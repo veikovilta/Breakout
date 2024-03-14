@@ -10,57 +10,46 @@ function validateIndexHtml() {
     }
 }
 
-function uiDrawRepeater(ui){
+function uiDrawRepeater(ui, brain){
     setTimeout(() => {
         ui.draw(); 
-        uiDrawRepeater(ui);
+        brain.ballMovement(ui); 
+        uiDrawRepeater(ui, brain);
     }, 0);
 }
 
 function main() {
-    console.log("hello wrold"); 
     validateIndexHtml();
-    let appDiv = document.querySelector<HTMLDivElement>("#app");
+    let appDiv = document.querySelector("#app");
     let brain = new Brain();
     let ui = new UI(brain, appDiv);
 
     document.addEventListener('keydown', (e) => {
+        console.log("pushed");
         switch (e.key) {
-            case 'q':
-                brain.startMovePaddle(brain.leftPaddle, -1);
+            case 'ArrowLeft':
+                brain.startMovePaddle(brain.paddle, -1);
                 break;
-            case 'a':
-                brain.startMovePaddle(brain.leftPaddle, 1);
-                break;
-            case 'o':
-                brain.startMovePaddle(brain.rightPaddle, -1);
-                break;
-            case 'l':
-                brain.startMovePaddle(brain.rightPaddle, 1);
+            case 'ArrowRight':
+                brain.startMovePaddle(brain.paddle, 1);
                 break;
         }
     });
 
     document.addEventListener('keyup', (e) => {
         switch (e.key) {
-            case 'q':
-                brain.stopMovePaddle(brain.leftPaddle);
+            case 'ArrowLeft':
+                brain.stopMovePaddle(brain.paddle);
                 break;
-            case 'a':
-                brain.stopMovePaddle(brain.leftPaddle);
-                break;
-            case 'o':
-                brain.stopMovePaddle(brain.rightPaddle);
-                break;
-            case 'l':
-                brain.stopMovePaddle(brain.rightPaddle);
+            case 'ArrowRight':
+                brain.stopMovePaddle(brain.paddle);
                 break;
         }
 
     });
 
     // draw ui as fast as possible - on repeat
-    uiDrawRepeater(ui);
+    uiDrawRepeater(ui, brain);
 }
 
 
