@@ -2,4 +2,32 @@ html {
     font-size: 16px;
     position: relative;
     min-height: 100%;
+    background-color: rgb(135, 136, 137);
+}
+
+.start-page {
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    grid-row: 2;
+    gap: 20px; 
+}
+
+.button-container {
+    grid-column: 2; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.single-brick{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    position: fixed;
+    color: rgb(255, 255, 255);
+}
+
+* {
+    border: 1px solid rgb(152, 3, 3);
 }

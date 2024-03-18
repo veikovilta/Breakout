@@ -1,5 +1,24 @@
 import Brain, { Paddle } from "./brain.js";
 
+export function drawStartPage(){
+    let mainDiv = document.querySelector("#app");
+
+    let startingPage = document.createElement("div");
+    startingPage.id = "starting-page";
+    startingPage.classList.add('start-page');
+    startingPage.innerHTML = `<h1>Welcome to the Game!</h1>`;
+
+    let startButton = document.createElement("button");
+    startButton.id = 'start-button';
+    startButton.textContent = 'Start'; // Add text content to the button
+
+    startingPage.appendChild(startButton); // Append the button to the startingPage div
+
+    mainDiv.appendChild(startingPage);
+
+    return startingPage;
+}
+
 export default class UI {
     // real screen dimensions
     width = -1;
@@ -71,6 +90,7 @@ export default class UI {
         div.style.height = this.calculateScaledY(paddle.height) + 'px';
 
         div.style.backgroundColor = paddle.color;
+        div.style.borderRadius = 10 + "%"; 
 
         this.appContainer.append(div);
     }
@@ -80,24 +100,24 @@ export default class UI {
 
         ballUI.style.zIndex = "10";
         ballUI.style.position = 'fixed';
+        ballUI.id = "ballid";
         
-        ballUI.style.top = ball.top + 'px';
-        ballUI.style.left = ball.left + 'px';
+        ballUI.style.top = this.calculateScaledY(ball.top) + 'px';
+        ballUI.style.left = this.calculateScaledX(ball.left) + 'px';
         
-        ballUI.style.width = ball.width + 'px';
-        ballUI.style.height = ball.height + 'px';
-        ballUI.style.backgroundColor = ball.color;
-        ballUI.style.borderRadius = 50 + '%';
+        ballUI.style.width = this.calculateScaledX(ball.width) + 'px';
+        ballUI.style.height = this.calculateScaledY(ball.height) + 'px';
+        ballUI.style.backgroundColor = ball.color;  
+        //ballUI.style.borderRadius = 50 + '%';
 
         this.appContainer.append(ballUI);
     }
 
-    drawSingleBrick(top, left, width, height, color){
+    drawSingleBrick(top, left, width, height, color, count){
     
         let brick = document.createElement('div');
 
-        brick.style.zIndex = "10";
-        brick.style.position = 'fixed';
+        brick.classList.add('single-brick'); 
 
         brick.style.top = top + 'px'; 
         brick.style.left = left + 'px'; 
@@ -106,23 +126,30 @@ export default class UI {
         brick.style.height = height + 'px'; 
 
         brick.style.backgroundColor = color; 
+        brick.innerHTML = "" + count;
 
         this.appContainer.append(brick);
     } 
 
     drawBrickField(brickField){
 
-        for(let i = 0; i < brickField.brickColumnCount; i++){
-            if(!brickField.array[i]){
-                this.drawSingleBrick(brickField.firstBrickTop, brickField.firstBrickLeft + i * brickField.brickOffsetLeft + 
-                    i * brickField.brickWidth, brickField.brickWidth, 
-                    brickField.brickHeight, brickField.brickColor);   
+        for(let i = 0; i < brickField.brickRowCount; i++){
+            for(let j = 0; j < brickField.brickColumnCount; j++)
+            if(brickField.matrix[i][j]){
+                this.drawSingleBrick(this.calculateScaledY(brickField.firstBrickTop) + 
+                    i * this.calculateScaledY(brickField.brickOffsetTop) + 
+                    i * this.calculateScaledY(brickField.brickHeight), 
+                    this.calculateScaledX(brickField.firstBrickLeft) + 
+                    j * this.calculateScaledX(brickField.brickOffsetLeft) + 
+                    j * this.calculateScaledX(brickField.brickWidth), 
+                    this.calculateScaledX(brickField.brickWidth), 
+                    this.calculateScaledY(brickField.brickHeight), 
+                    brickField.brickColor, brickField.matrix[i][j]);   
             }
-
         }
     }
 
-    draw(){
+    drawAllEle(){
         // clear previous render
         // TODO: optimize - change elems, do not recreate on every frame!!!!!
         this.appContainer.innerHTML = '';
@@ -132,5 +159,44 @@ export default class UI {
         this.drawPaddle(this.brain.paddle);
         this.drawBall(this.brain.ball);
         this.drawBrickField(this.brain.brickField); 
+        //console.log(this.appContainer.innerHTML); 
+    }
+
+    drawBallActive() {
+        this.setScreenDimensions();
+        const ballDivs = document.querySelectorAll('div[style*="blue"]');
+      
+        if (ballDivs.length > 0) {
+            const ballDiv = ballDivs[0];
+            ballDiv.style.left = this.calculateScaledX(this.brain.ball.left) + 'px';
+            ballDiv.style.top = this.calculateScaledY(this.brain.ball.top) + 'px';
+        } else {
+            this.drawBall(this.brain.ball);
+        }
+      
+        const paddleDivs = document.querySelectorAll('div[style*="green"]');
+      
+        if (paddleDivs.length > 0) {
+            const paddleDiv = paddleDivs[0];
+            paddleDiv.style.left = this.calculateScaledX(this.brain.paddle.left) + 'px';
+            paddleDiv.style.top = this.calculateScaledY(this.brain.paddle.top) + 'px';
+        } else {
+            this.drawPaddle(this.brain.paddle);
+        }
+    }
+
+    drawActiveBrickField(pos) {
+        this.setScreenDimensions();
+        
+        const brickDivs = document.querySelectorAll('div[style*="black"]');
+
+        if (brickDivs.length > 0) {
+            brickDivs.forEach(brickDiv => {
+                brickDiv.parentNode.removeChild(brickDiv);
+            });
+        }
+
+        this.drawBrickField(this.brain.brickField); 
+
     }
 }
