@@ -1,22 +1,70 @@
-import Brain, { Paddle } from "./brain.js";
-
-export function drawStartPage(){
+export function drawStartPage(bestScores){
     let mainDiv = document.querySelector("#app");
+    mainDiv.classList.add('app-container'); 
 
     let startingPage = document.createElement("div");
     startingPage.id = "starting-page";
     startingPage.classList.add('start-page');
-    startingPage.innerHTML = `<h1>Welcome to the Game!</h1>`;
 
+    let breakOutText = document.createElement('div');
+    breakOutText.classList.add('breakout-text'); 
+    breakOutText.innerHTML = `BREAKOUT`;
+    
+    let buttons = document.createElement('div'); 
+    buttons.classList.add('button-container-start');
+    
     let startButton = document.createElement("button");
+    startButton.classList.add('button-start'); 
     startButton.id = 'start-button';
-    startButton.textContent = 'Start'; // Add text content to the button
+    startButton.textContent = 'Start';
 
-    startingPage.appendChild(startButton); // Append the button to the startingPage div
+    buttons.appendChild(startButton); 
+
+    startingPage.appendChild(breakOutText);
+    startingPage.appendChild(buttons);
 
     mainDiv.appendChild(startingPage);
 
+    drawHighscores(mainDiv, bestScores); 
+
     return startingPage;
+}
+
+function drawHighscores(appDiv, bestScores){
+    
+    let highScores = document.createElement('div'); 
+    highScores.classList.add('highscores-container'); 
+
+    let highScoresText = document.createElement('div');
+    highScores.classList.add('highscore-text'); 
+    highScores.innerHTML = `Best 5 scores`;
+
+    highScores.appendChild(highScoresText);
+
+    bestScores = bestScores.filter((number, index) => {
+        return bestScores.indexOf(number) === index;
+    });
+
+    bestScores = bestScores.sort((a, b) => b - a);
+
+    let i = 1; 
+
+    bestScores.forEach(element => {
+
+        if(i > 5){
+            return; 
+        }
+        else{
+            let highScore = document.createElement('div');
+            highScore.classList.add('highscore'); 
+            highScore.innerHTML = i + `) ` + element + 'points';
+            highScores.appendChild(highScore); 
+            i++; 
+        }
+
+    });
+
+    appDiv.appendChild(highScores); 
 }
 
 export default class UI {
@@ -69,16 +117,18 @@ export default class UI {
 
     drawBorder(){
         // top border
-        this.drawBorderSingle(0, 0, this.width, this.calculateScaledY(this.brain.borderThickness), 'red');
+        this.drawBorderSingle(0, 0, this.width, 2 * this.calculateScaledY(this.brain.borderThickness), 'black');
         // left
-        this.drawBorderSingle(0, 0, this.calculateScaledX(this.brain.borderThickness), this.height, 'red');
+        this.drawBorderSingle(0, 0, this.calculateScaledX(this.brain.borderThickness), this.height, 'black');
         // right
-        this.drawBorderSingle(this.width - this.calculateScaledX(this.brain.borderThickness), 0, this.calculateScaledX(this.brain.borderThickness), this.height, 'red');
+        this.drawBorderSingle(this.width - this.calculateScaledX(this.brain.borderThickness), 0, this.calculateScaledX(this.brain.borderThickness), this.height, 'black');
         this.drawBorderSingle(0, this.height - this.calculateScaledY(this.brain.borderThickness), this.width, this.calculateScaledY(this.brain.borderThickness), 'red');
     }
 
     drawPaddle(paddle){
         let div = document.createElement('div');
+
+        div.classList.add('paddle'); 
 
         div.style.zIndex = "10";
         div.style.position = 'fixed';
@@ -125,7 +175,7 @@ export default class UI {
         brick.style.width = width + 'px';
         brick.style.height = height + 'px'; 
 
-        brick.style.backgroundColor = color; 
+        brick.style.backgroundColor = color;  
         brick.innerHTML = "" + count;
 
         this.appContainer.append(brick);
@@ -159,25 +209,26 @@ export default class UI {
         this.drawPaddle(this.brain.paddle);
         this.drawBall(this.brain.ball);
         this.drawBrickField(this.brain.brickField); 
-        //console.log(this.appContainer.innerHTML); 
+        this.drawLiveScore();
+        this.drawPauseButton(); 
     }
 
     drawBallActive() {
         this.setScreenDimensions();
-        const ballDivs = document.querySelectorAll('div[style*="blue"]');
+        let ballDivs = document.querySelectorAll('div[style*="blue"]');
       
         if (ballDivs.length > 0) {
-            const ballDiv = ballDivs[0];
+            let ballDiv = ballDivs[0];
             ballDiv.style.left = this.calculateScaledX(this.brain.ball.left) + 'px';
             ballDiv.style.top = this.calculateScaledY(this.brain.ball.top) + 'px';
         } else {
             this.drawBall(this.brain.ball);
         }
       
-        const paddleDivs = document.querySelectorAll('div[style*="green"]');
+        let paddleDivs = document.querySelectorAll('.paddle');
       
         if (paddleDivs.length > 0) {
-            const paddleDiv = paddleDivs[0];
+            let paddleDiv = paddleDivs[0];
             paddleDiv.style.left = this.calculateScaledX(this.brain.paddle.left) + 'px';
             paddleDiv.style.top = this.calculateScaledY(this.brain.paddle.top) + 'px';
         } else {
@@ -188,7 +239,7 @@ export default class UI {
     drawActiveBrickField(pos) {
         this.setScreenDimensions();
         
-        const brickDivs = document.querySelectorAll('div[style*="black"]');
+        let brickDivs = document.querySelectorAll('.single-brick');
 
         if (brickDivs.length > 0) {
             brickDivs.forEach(brickDiv => {
@@ -198,5 +249,55 @@ export default class UI {
 
         this.drawBrickField(this.brain.brickField); 
 
+        let scoreDivs = document.querySelectorAll('.live-score');
+
+        if (scoreDivs.length > 0) {
+            scoreDivs.forEach(scoreDiv => {
+                scoreDiv.parentNode.removeChild(scoreDiv);
+            });
+        }
+
+        this.drawLiveScore(); 
+    }
+
+    drawLiveScore(){
+
+        let score = document.createElement('div');
+        score.classList.add('live-score'); 
+        score.innerHTML = `SCORE: ` + this.brain.score;
+
+        this.appContainer.appendChild(score); 
+    }
+
+    drawPauseButton(){
+
+        let pauseButtonCont = document.createElement('div'); 
+        pauseButtonCont.classList.add('button-container-pause');
+        
+        let pauseButton = document.createElement("button");
+        pauseButton.classList.add('button-pause'); 
+        pauseButton.id = 'pause-button';
+        pauseButton.textContent = 'Pause';
+
+        pauseButtonCont.appendChild(pauseButton); 
+
+        this.appContainer.appendChild(pauseButtonCont); 
+    }
+
+    drawPausePage(){
+
+        let continueButtonCont = document.createElement('div'); 
+        continueButtonCont.classList.add('button-container-continue');
+        
+        let continueButton = document.createElement("button");
+        continueButton.classList.add('button-continue'); 
+        continueButton.id = 'continue-button';
+        continueButton.textContent = 'continue';
+
+        continueButtonCont.appendChild(continueButton);
+
+        this.appContainer.appendChild(continueButtonCont); 
+
+        return continueButtonCont;
     }
 }

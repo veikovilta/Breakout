@@ -1,4 +1,3 @@
-
 export class Paddle {
     _width = 100;
     _height = 30;
@@ -35,8 +34,6 @@ export class Paddle {
             clearInterval(this.intervalId);
             this.intervalId = undefined;
         }
-
-        //console.log(this.left);
     }
 
     startMove(step, borderThickness, ui){
@@ -58,10 +55,14 @@ export class Paddle {
 
 }
 
+export function randomValue(min, max){
+    return (Math.random() * (max - min) + (min)).toFixed(0); 
+}
+
 export class Ball {
     
     _width = 15;
-    _height = 15;
+    _height = 30;
 
     constructor(left, top, color, leftStep, topStep) {
         this.left = left; 
@@ -136,21 +137,20 @@ export class Ball {
         if (ballTop > brickTop - ballHeight && ballTop < brickTop + brickHeight) {
             // Check for left and right collisions
             // Left
-            if (ballLeft + ballWidth > brickLeft - 3 && ballLeft + ballWidth < brickLeft + brickWidth) {
+            if (ballLeft + ballWidth > brickLeft - 3 && ballLeft + ballWidth < brickLeft + brickWidth) {//little offset to detect earlier
                 console.log("left");
                 this.topStep = -this.topStep;
                 this.leftStep = -this.leftStep;
                 return false;
             }
             // Right
-            else if (ballLeft < brickLeft + brickWidth + 3 && ballLeft > brickLeft) {
+            else if (ballLeft < brickLeft + brickWidth + 5 && ballLeft > brickLeft) {//little offset to detect earlier 
                 console.log("right");
                 this.topStep = -this.topStep;
                 this.leftStep = -this.leftStep;
                 return false;
             }
         }
-        
 
         return true; 
     }
@@ -173,7 +173,7 @@ export class Ball {
     }
 
     checkTopCollision(winHeight, borderThickness, ballTop, ballHeight){    
-        if (ballTop < borderThickness) {
+        if (ballTop < borderThickness * 2) {
             return 1;
         }
         else if(ballTop + ballHeight > winHeight - borderThickness){
@@ -191,16 +191,16 @@ export class Ball {
 
 export class BrickField{
 
-    _brickRowCount = 3;
+    _brickRowCount = 5;
     _brickColumnCount = 10;
     _brickWidth = 75;
-    _brickHeight = 60;
+    _brickHeight = 40;
     _brickPadding = 10;
     _brickOffsetTop = 30;
-    _brickOffsetLeft = 5;
+    _brickOffsetLeft = 10;
 
     matrix = Array.from({ length: this._brickRowCount }, () => 
-        new Array(this._brickColumnCount).fill(2)
+        new Array(this._brickColumnCount).fill(randomValue(1, 5))
     );
 
     constructor(top, left, color){
@@ -247,6 +247,8 @@ export default class Brain {
     height = 1000;
     borderThickness = 30;
 
+    score = 0; 
+
     lastState = 0; 
 
     ballLeft = 400; 
@@ -256,7 +258,7 @@ export default class Brain {
 
     paddle = new Paddle(100, 900, 'green');
     ball = new Ball(this.ballLeft, this.ballTop, "blue", this.ballLeftStep, this.ballTopStep); 
-    brickField = new BrickField( 100, 100, "black"); 
+    brickField = new BrickField( 100, 80, "grey"); 
 
     constructor() {
         console.log("Brain ctor");
@@ -278,9 +280,7 @@ export default class Brain {
         if(topCollision == 1){
             this.ball.topStep = -this.ball.topStep;  
         }
-        else if(topCollision == 2){
-            //window.location.reload();
-            //alert("game over"); 
+        else if(topCollision == 2){ 
             return "game over"; 
         }
        
@@ -298,7 +298,6 @@ export default class Brain {
 
             if(paddleCollision === false && this.lastState === 0){
                 this.ball.topStep = -this.ball.topStep;
-                //this.ball.leftStep = -this.ball.leftStep; 
                 this.ball.leftStep = parseFloat((Math.random() * (8 - (-8))
                                                      + (-8)).toFixed(2));
                 this.lastState = paddleCollision;
@@ -310,6 +309,8 @@ export default class Brain {
 
         if(Object.keys(result).length !== 0){
             this.ball.moveBall(this.ball.topStep, this.ball.leftStep);
+            this.score++; 
+            console.log("score: " + this.score); 
             return result; 
         } 
           
@@ -318,3 +319,5 @@ export default class Brain {
         return "game on"; 
     }
 }
+
+

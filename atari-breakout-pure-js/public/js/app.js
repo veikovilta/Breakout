@@ -1,6 +1,9 @@
 import Brain from "./brain.js";
 import UI, {drawStartPage} from "./ui.js";
 
+let animationNumber = 0; 
+let bestScores = []; 
+
 function validateIndexHtml() {
     if (document.querySelectorAll("#app").length != 1) {
         throw Error("More or less than one div with id 'app' found!");
@@ -14,22 +17,23 @@ function validateIndexHtml() {
 
 function uiDrawRepeater(ui, brain) {
     function drawFrame() {
-        ui.drawBallActive(); 
+        ui.drawBallActive();  
         let gameState = brain.ballMovement(ui); 
 
         if(typeof gameState === 'object'){
             ui.drawActiveBrickField(gameState); 
-        }
+        } 
 
-        if(gameState ===  "game over"){
+        if(gameState === "game over"){
+            bestScores.push(brain.score); 
             ui.appContainer.innerHTML = ""; 
-            startPage().then(main);
+            startPage(bestScores).then(main);
         }
         else{
-            requestAnimationFrame(() => drawFrame());
+            animationNumber = requestAnimationFrame(drawFrame);
         }
     }
-    drawFrame();
+    animationNumber = requestAnimationFrame(drawFrame);
 }
 
 const repeater = (brain) => {
@@ -40,18 +44,26 @@ const repeater = (brain) => {
     }, 1000)
 }
 
-function startPage() {
+function startPage(bestScores) {
     return new Promise((resolve) => {
-      let startingPage = drawStartPage();
-      console.log("hello");  
-      // Add event listener to the start button
+      let startingPage = drawStartPage(bestScores);
+      console.log("best scores: " + bestScores);  
   
       document.querySelector("#start-button").addEventListener("click", () => {
-          // Remove the starting page
           startingPage.remove();
-          // Resolve the promise to continue with the game
           resolve(); 
       });
+    });
+}
+
+function pausePage(ui){
+    return new Promise((resolve) => {
+        let pausePage = ui.drawPausePage(); 
+    
+        document.querySelector("#continue-button").addEventListener("click", () => {
+            pausePage.remove();
+            resolve(); 
+        });
     });
 }
 
@@ -67,7 +79,7 @@ function main() {
     });
 
     document.addEventListener('keydown', (e) => {
-        console.log("pushed");
+        //console.log("pushed");
         switch (e.key) {
             case 'ArrowLeft':
                 brain.startMovePaddle(brain.paddle, -1);
@@ -91,6 +103,11 @@ function main() {
 
     ui.drawAllEle(); 
 
+    document.querySelector("#pause-button").addEventListener("click", () => {
+        cancelAnimationFrame(animationNumber); 
+        pausePage(ui).then(() => uiDrawRepeater(ui, brain)); 
+    });
+
     repeater(brain);
     // draw ui as fast as possible - on repeat
     uiDrawRepeater(ui, brain);
@@ -99,6 +116,6 @@ function main() {
 // =============== ENTRY POINT ================
 console.log("App startup...");
 
-startPage().then(main);
+startPage(bestScores).then(main);
 
 
