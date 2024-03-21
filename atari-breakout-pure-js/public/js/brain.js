@@ -158,7 +158,30 @@ export class Ball {
     checkPaddleCollision(paddleTop, paddleLeft, paddleWidth, paddleHeight, ballLeft, ballWidth, ballTop, ballHeight){
         if(ballTop + ballHeight > paddleTop){
             if (!((ballLeft + ballWidth < paddleLeft) || ballLeft > paddleLeft + paddleWidth)){
-                this.lastState = 1; 
+                this.lastState = 1;
+                console.log("paddle width: " + paddleWidth);
+                
+                if(paddleLeft + 0.2 * paddleWidth > ballLeft){
+                    console.log("1");
+                    this.leftStep = -8;
+                }
+                else if(paddleLeft + 0.4 * paddleWidth > ballLeft){
+                    console.log("2");
+                    this.leftStep = -4;
+                }
+                else if(paddleLeft + 0.6 * paddleWidth > ballLeft){
+                    console.log("3");
+                    this.leftStep = 0;
+                }
+                else if(paddleLeft + 0.8 * paddleWidth > ballLeft){
+                    console.log("4");
+                    this.leftStep = 4;
+                }
+                else if(paddleLeft + 1 * paddleWidth > ballLeft){
+                    console.log("5");
+                    this.leftStep = 8;
+                }
+
                 return false; 
             }  
         }
@@ -314,8 +337,8 @@ export default class Brain {
 
             if(paddleCollision === false && this.lastState === 0){
                 this.ball.topStep = -this.ball.topStep;
-                this.ball.leftStep = parseFloat((Math.random() * (8 - (-8))
-                                                     + (-8)).toFixed(2));
+                //this.ball.leftStep = parseFloat((Math.random() * (8 - (-8))
+                                                     //+ (-8)).toFixed(2));
                 this.lastState = paddleCollision;
             }
             
