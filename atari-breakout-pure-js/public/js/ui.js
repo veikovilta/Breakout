@@ -57,7 +57,7 @@ function drawHighscores(appDiv, bestScores){
         else{
             let highScore = document.createElement('div');
             highScore.classList.add('highscore'); 
-            highScore.innerHTML = i + `) ` + element + 'points';
+            highScore.innerHTML = i + `) ` + element + ' points';
             highScores.appendChild(highScore); 
             i++; 
         }
