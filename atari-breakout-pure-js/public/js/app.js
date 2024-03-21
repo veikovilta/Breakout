@@ -1,4 +1,4 @@
-import Brain from "./brain.js";
+import Brain, { BrickField } from "./brain.js";
 import UI, {drawStartPage} from "./ui.js";
 
 let animationNumber = 0; 
@@ -22,7 +22,7 @@ function uiDrawRepeater(ui, brain) {
 
         if(typeof gameState === 'object'){
             ui.drawActiveBrickField(gameState); 
-        } 
+        }
 
         if(gameState === "game over"){
             bestScores.push(brain.score); 

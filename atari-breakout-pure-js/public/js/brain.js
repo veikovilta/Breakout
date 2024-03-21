@@ -199,14 +199,30 @@ export class BrickField{
     _brickOffsetTop = 30;
     _brickOffsetLeft = 10;
 
-    matrix = Array.from({ length: this._brickRowCount }, () => 
-        new Array(this._brickColumnCount).fill(randomValue(1, 5))
-    );
+    matrix = this.fillMatrix(this._brickRowCount, this._brickColumnCount); 
 
     constructor(top, left, color){
         this.firstBrickTop = top; 
         this.firstBrickLeft = left;
         this._brickColor = color; 
+    }
+
+    fillMatrix(rows , cols){
+
+        let newMatrix = Array.from({ length: rows }, () => 
+            Array.from({ length: cols }, () =>
+                randomValue(1, 5)
+            )
+        );
+
+        return newMatrix; 
+    }
+
+    checkIfBricksAreGone(){
+
+        if(this.matrix.every(row => row.every(element => element === 0))){
+            this.matrix = this.fillMatrix(this.brickRowCount, this.brickColumnCount); 
+        }
     }
 
     get brickColor(){

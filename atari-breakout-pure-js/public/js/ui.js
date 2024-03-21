@@ -247,6 +247,8 @@ export default class UI {
             });
         }
 
+        this.brain.brickField.checkIfBricksAreGone(); 
+
         this.drawBrickField(this.brain.brickField); 
 
         let scoreDivs = document.querySelectorAll('.live-score');
